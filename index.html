@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cờ Caro 9x9</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(9, 50px);
+      grid-template-rows: repeat(9, 50px);
+      margin: 20px auto;
+      width: fit-content;
+      gap: 1px;
+      background: #333;
+    }
+    .cell {
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .cell:hover {
+      background-color: #ddd;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 20px;
+      color: green;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Game Cờ Caro 9x9</h1>
+  <div id="board"></div>
+  <div id="status">Người chơi X bắt đầu</div>
+  <button onclick="resetGame()">Chơi lại</button>
+
+  <script>
+    const boardSize = 9;
+    let board = [];
+    let currentPlayer = 'X';
+    let gameOver = false;
+
+    const boardEl = document.getElementById('board');
+    const statusEl = document.getElementById('status');
+
+    function createBoard() {
+      boardEl.innerHTML = '';
+      board = [];
+      for (let i = 0; i < boardSize; i++) {
+        board[i] = [];
+        for (let j = 0; j < boardSize; j++) {
+          board[i][j] = '';
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.row = i;
+          cell.dataset.col = j;
+          cell.addEventListener('click', handleClick);
+          boardEl.appendChild(cell);
+        }
+      }
+    }
+
+    function handleClick(event) {
+      if (gameOver) return;
+
+      const row = parseInt(event.target.dataset.row);
+      const col = parseInt(event.target.dataset.col);
+
+      if (board[row][col] !== '') return;
+
+      board[row][col] = currentPlayer;
+      event.target.textContent = currentPlayer;
+
+      if (checkWin(row, col)) {
+        statusEl.textContent = `Người chơi ${currentPlayer} thắng!`;
+        gameOver = true;
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        statusEl.textContent = `Lượt của người chơi ${currentPlayer}`;
+      }
+    }
+
+    function checkWin(row, col) {
+      return (
+        countConsecutive(row, col, 0, 1) + countConsecutive(row, col, 0, -1) >= 4 ||
+        countConsecutive(row, col, 1, 0) + countConsecutive(row, col, -1, 0) >= 4 ||
+        countConsecutive(row, col, 1, 1) + countConsecutive(row, col, -1, -1) >= 4 ||
+        countConsecutive(row, col, 1, -1) + countConsecutive(row, col, -1, 1) >= 4
+      );
+    }
+
+    function countConsecutive(row, col, dRow, dCol) {
+      let count = 0;
+      let i = row + dRow;
+      let j = col + dCol;
+      while (
+        i >= 0 && i < boardSize &&
+        j >= 0 && j < boardSize &&
+        board[i][j] === currentPlayer
+      ) {
+        count++;
+        i += dRow;
+        j += dCol;
+      }
+      return count;
+    }
+
+    function resetGame() {
+      currentPlayer = 'X';
+      gameOver = false;
+      statusEl.textContent = 'Người chơi X bắt đầu';
+      createBoard();
+    }
+
+    createBoard();
+  </script>
+
+</body>
+</html>
